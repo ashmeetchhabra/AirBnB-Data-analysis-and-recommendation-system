@@ -22,27 +22,30 @@ def getListingByNeighbourhood(neighbourhood_group):
 
 # Basic Query 3
 def updateReviewsOfListing(listing_id):
-    review = float(input("Give the rating (out of 5) to the listing: "))
-    text_review = input("Give The Review of the listing")
-    if review < 0 or review > 5:
-        print("Invalid Review.")
-    else:
-        # TODO: Call the function from hrishikesh's file. give input as review and text_review
-        given_query = {"id": listing_id}
-        num_of_reviews = collection.find({"id": listing_id}, {"number_of_reviews": 1})
-        review_from_db_cursor = collection.find({"id": listing_id}, {"review_val": 1})
-        review_from_db = float(list(review_from_db_cursor)[0]["review_val"])
-        print("The review is:", review_from_db)
-        review_avg = (review_from_db + review) / 2
-        num_of_reviews_1 = int(list(num_of_reviews)[0]["number_of_reviews"])
-        print("Review to be updated is :", review_avg)
-        review_per_month = (num_of_reviews_1 + 1) / 120
-        update_query = {
-            "$set": {"review_val": review_avg, "number_of_reviews": int(num_of_reviews_1) + 1,
-                     "reviews_per_month": review_per_month},
-            "$currentDate": {"last_review": True}
-        }
-        collection.update_one(given_query, update_query)
+    try:
+        review = float(input("Give the rating (out of 5) to the listing: "))
+        text_review = input("Give The Review of the listing")
+        if review < 0 or review > 5:
+            print("Invalid Review.")
+        else:
+            # TODO: Call the function from hrishikesh's file. give input as review and text_review
+            given_query = {"id": listing_id}
+            num_of_reviews = collection.find({"id": listing_id}, {"number_of_reviews": 1})
+            review_from_db_cursor = collection.find({"id": listing_id}, {"review_val": 1})
+            review_from_db = float(list(review_from_db_cursor)[0]["review_val"])
+            print("The review is:", review_from_db)
+            review_avg = (review_from_db + review) / 2
+            num_of_reviews_1 = int(list(num_of_reviews)[0]["number_of_reviews"])
+            print("Review to be updated is :", review_avg)
+            review_per_month = (num_of_reviews_1 + 1) / 120
+            update_query = {
+                "$set": {"review_val": review_avg, "number_of_reviews": int(num_of_reviews_1) + 1,
+                         "reviews_per_month": review_per_month},
+                "$currentDate": {"last_review": True}
+            }
+            collection.update_one(given_query, update_query)
+    except Exception:
+        print("Wrong Record")
 
 
 # Sophisticated Query 2
@@ -154,7 +157,7 @@ while flag:
         neighbourhood_group = input("Which neighbourhood_group you want near your house: ")
         getListingByNeighbourhood(neighbourhood_group)
     elif i == 2:
-        listing_id = input("Enter the listing id to which you want to provide reviews.")
+        listing_id = int(input("Enter the listing id to which you want to provide reviews."))
         updateReviewsOfListing(listing_id)
     elif i == 3:
         getNearestAttractionListing()
