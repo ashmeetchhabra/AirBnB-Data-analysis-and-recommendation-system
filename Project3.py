@@ -5,7 +5,7 @@ import datetime as dt
 from dateutil.parser import parse
 
 connection = pymongo.MongoClient('localhost', 27017)
-database = connection['AirbnbFinal']
+database = connection['Airbnb4']
 collection = database['listing']
 print("Database connected")
 
@@ -13,8 +13,12 @@ print("Database connected")
 # Basic Query 1
 def getListingByNeighbourhood(neighbourhood_group):
     retrieve_data = collection.find({"neighbourhood_group": neighbourhood_group})
-    for document in retrieve_data:
-        pprint(document)
+    list_retrieve_data = list(retrieve_data)
+    if not list_retrieve_data:
+        print("No neighbourhood group with", neighbourhood_group, " present")
+    else:
+        for document in list_retrieve_data:
+            pprint(document)
 
 
 # Basic Query 3
@@ -26,9 +30,10 @@ def updateReviewsOfListing(listing_id):
             print("Invalid Review.")
         else:
             sophisticated_query1(listing_id, review, text_review)
+            print("Execution till here successful")
 
-    except Exception:
-        print("Wrong Record")
+    except Exception as err:
+        print("Wrong Record",err)
 
 
 # Sophisticated Query 2
@@ -66,9 +71,13 @@ def getNearestAttractionListing():
                     pass
     # To find min of the value in dict
     itemMinValue = min(dict_of_dist.items(), key=lambda x: x[1])
-    print("Minimum of the distance of listing is:: ", itemMinValue[1], "Km")
     listing_shortest_distance = collection.find({"_id": itemMinValue[0]})
-    print("The listing with minimum distance is::", list(listing_shortest_distance))
+    print("The listing with minimum distance from Posh Area is::", list(listing_shortest_distance))
+    print("This listing is very near to the Posh area, Flatbush Ave. "
+          "It has many restaurants like: Taro Shushi, Alta Calidad, Chuko, Olmsted, Ki Shushi and many more, ")
+    print("which are very near and in walking distance. It has Atlantic Train terminal, Best Buy and a "
+          "super market such as Walmart nearby ")
+    print("Minimum of the distance of listing from the Flatbush Ave is:: ", itemMinValue[1], "Km")
 
 
 # Sophisticated Query 4
@@ -122,26 +131,28 @@ def lowerPricePrediction():
                 print("New Price Updated")
                 collection.update_one(given_query, update_query)
                 data_retrieved_priceUpdated = collection.find({"id": each_listing['id']})
-                print("After updation in db", list(data_retrieved_priceUpdated))
+                print("After updating in db", list(data_retrieved_priceUpdated))
         except Exception as err:
             pass
 
 
 # Basic query 2
-
 def basic_query2(host_name):
     try:
         query = {"host_name": host_name}
         result = collection.find(query, {"_id": 0})
-        for results in result:
-            print(results)
+        list_result = list(result)
+        if not list_result:
+            print("No listing with ", host_name, " as host name")
+        else:
+            for results in list_result:
+                print(results)
 
     except Exception as e:
         print("Exception " + str(e))
 
 
 # Basic query 4
-
 def basic_query4(nhood_group):
     try:
         query = {"neighbourhood_group": nhood_group}
@@ -168,7 +179,6 @@ def basic_query4(nhood_group):
 
 
 # Sophisticated Query 1
-
 def sophisticated_query1(listing_id, review, text_review):
     given_query = {"id": listing_id}
     num_of_reviews = collection.find({"id": listing_id}, {"number_of_reviews": 1})
@@ -200,7 +210,6 @@ def sophisticated_query1(listing_id, review, text_review):
 
 
 # Sophisticated Query 3
-
 def sophisticated_query3(listing_id):
     print("The result is: ")
     query = {"id": listing_id}
@@ -232,30 +241,53 @@ while flag:
     print("7. Show additional recommendations subjective to price and better reviews")
     print("8. Price prediction of rooms based on present data")
     print("9. Quit")
-    i = int(input("Enter Your Choice:  "))
-    if i == 1:
+    i = input("Enter Your Choice:  ")
+    if i == '1':
         neighbourhood_group = input("Which neighbourhood_group you want near your house:  ")
         getListingByNeighbourhood(neighbourhood_group)
-    elif i == 2:
+    elif i == '2':
         host_name = input("Enter the name of the host you want to search listings of:  ")
         basic_query2(host_name)
-    elif i == 3:
-        listing_id = str(input("Enter the listing id to which you want to provide reviews:  "))
-        updateReviewsOfListing(listing_id)
-    elif i == 4:
+    elif i == '3':
+        listing_id = input("Enter the listing id to which you want to provide reviews.")
+        listing = collection.find({"id": listing_id})
+        # print("List_Listing::",list(listing))
+        list_listing = list(listing)
+        if not list_listing:
+            print("Listing not Found")
+        else:
+            updateReviewsOfListing(listing_id)
+    elif i == '4':
         nhood_group = input("Enter the name of Neighbourhood group you are looking prices for:  ")
-        basic_query4(nhood_group)
-    elif i == 5:
-        listing_id = str(input("Enter the listing id to which you want to provide reviews:  "))
-        updateReviewsOfListing(listing_id)
-    elif i == 6:
+        nhood_group_db = collection.find({"neighbourhood_group": nhood_group})
+        nhood_group_list=list(nhood_group_db)
+        if not nhood_group_list:
+            print("Neighbourhood_group is not found")
+        else:
+            basic_query4(nhood_group)
+    elif i == '5':
+        listing_id = input("Enter the listing id to which you want to provide reviews.")
+        listing = collection.find({"id": listing_id})
+        # print("List_Listing::",list(listing))
+        list_listing = list(listing)
+        if not list_listing:
+            print("Listing not Found")
+        else:
+            updateReviewsOfListing(listing_id)
+    elif i == '6':
         getNearestAttractionListing()
-    elif i == 7:
+    elif i == '7':
         listing_id = input("Enter the listing id you are looking better options for:  ")
-        sophisticated_query3(listing_id)
-    elif i == 8:
+        listing = collection.find({"id": listing_id})
+        # print("List_Listing::",list(listing))
+        list_listing = list(listing)
+        if not list_listing:
+            print("Listing not Found")
+        else:
+            sophisticated_query3(listing_id)
+    elif i == '8':
         lowerPricePrediction()
-    elif i == 9:
+    elif i == '9':
         print("Thank you!")
         flag = False
     else:
