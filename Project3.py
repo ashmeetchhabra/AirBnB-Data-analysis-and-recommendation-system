@@ -12,7 +12,8 @@ print("Database connected")
 
 # Basic Query 1
 def getListingByNeighbourhood(neighbourhood_group):
-    retrieve_data = collection.find({"neighbourhood_group": neighbourhood_group})
+    retrieve_data = collection.find(
+        {"neighbourhood_group": neighbourhood_group, "availability_365": {'$not': {'$lt': '1'}}})
     list_retrieve_data = list(retrieve_data)
     if not list_retrieve_data:
         print("No neighbourhood group with", neighbourhood_group, " present")
@@ -33,7 +34,7 @@ def updateReviewsOfListing(listing_id):
             print("Execution till here successful")
 
     except Exception as err:
-        print("Wrong Record",err)
+        print("Wrong Record", err)
 
 
 # Sophisticated Query 2
@@ -260,7 +261,7 @@ while flag:
     elif i == '4':
         nhood_group = input("Enter the name of Neighbourhood group you are looking prices for:  ")
         nhood_group_db = collection.find({"neighbourhood_group": nhood_group})
-        nhood_group_list=list(nhood_group_db)
+        nhood_group_list = list(nhood_group_db)
         if not nhood_group_list:
             print("Neighbourhood_group is not found")
         else:
